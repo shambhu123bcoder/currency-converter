@@ -62,20 +62,28 @@ export class CurrencyConverter {
     }
 
     // Conversion with timeout
+    let timeoutId: any;
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Conversion timeout')), timeout);
+      timeoutId = setTimeout(() => reject(new Error('Conversion timeout')), timeout);
     });
 
-    const conversionPromise = this.performConversion(from, to, amount, source);
+    try {
+      const result = await Promise.race<ConversionResult>([
+        this.performConversion(from, to, amount, source),
+        timeoutPromise
+      ]);
 
-    const result = await Promise.race<ConversionResult>([conversionPromise, timeoutPromise]);
+      // Save to cache on success
+      if (result && result.rate) {
+        this.cache.set(from, to, result.rate);
+      }
 
-    // Save to cache on success
-    if (result && result.rate) {
-      this.cache.set(from, to, result.rate);
+      return result;
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
-
-    return result;
   }
 
   private async performConversion(
