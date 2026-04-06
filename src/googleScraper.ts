@@ -94,12 +94,13 @@ export class GoogleCurrencyScraper {
     to: string,
     amount: number
   ): Promise<ConversionResult> {
-    await this.initializeBrowser();
-    const page = await GoogleCurrencyScraper.browser!.newPage();
+    let page: Page | undefined;
     const url = `https://www.google.com/finance/quote/${from.toUpperCase()}-${to.toUpperCase()}?hl=en`;
     const attemptedMethods: string[] = ['stealth_finance'];
 
     try {
+      await this.initializeBrowser();
+      page = await GoogleCurrencyScraper.browser!.newPage();
       await page.setUserAgent(this.userAgent);
       await page.setViewport({ width: 1280, height: 800 });
       
@@ -132,15 +133,24 @@ export class GoogleCurrencyScraper {
       };
 
     } catch (error) {
-      const htmlSnippet = await page.evaluate(() => document.body.innerHTML.substring(0, 1000));
+      let htmlSnippet = '';
+      if (page) {
+        try {
+          htmlSnippet = await page.evaluate(() => document.body.innerHTML.substring(0, 1000));
+        } catch (e) {
+          // Ignore snippet extraction errors
+        }
+      }
       throw {
-        message: error instanceof Error ? error.message : 'Google Finance extraction failed',
+        message: error instanceof Error ? error.message : String(error),
         code: 'GOOGLE_EXTRACT_ERROR',
         source: 'google',
         debugInfo: { url, htmlSnippet, methodAttempted: attemptedMethods }
       } as ApiError;
     } finally {
-      await page.close();
+      if (page) {
+        await page.close();
+      }
     }
   }
 
