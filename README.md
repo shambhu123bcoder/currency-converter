@@ -14,7 +14,7 @@ A robust, **100% free-of-cost** currency conversion library for Node.js. It uses
 ## 📦 Installation
 
 ```bash
-npm install currency-converter-scraper puppeteer-extra puppeteer-extra-plugin-stealth
+npm install currency-converter-scraper
 ```
 
 ## 🎯 Quick Start
@@ -78,8 +78,8 @@ This library is designed for production resilience. It attempts conversion in th
 - `axios` - HTTP client for API requests and fast scraping
 - `cheerio` - HTML parsing for lightweight extraction
 - `puppeteer` - Headless browser for robust scraping
-- `puppeteer-extra` - Enhanced wrapper for Puppeteer
-- `puppeteer-extra-plugin-stealth` - Necessary for bypassing bot detection
+- `puppeteer-extra` - Enhanced wrapper (included)
+- `puppeteer-extra-plugin-stealth` - Necessary for bypassing bot detection (included)
 
 ## 📜 License
 
